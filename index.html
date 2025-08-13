@@ -1,79 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Information Form</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>National SoC Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css" />
+  <link rel="preconnect" href="https://fastly.jsdelivr.net" />
+  <script src="https://fastly.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <script src="https://fastly.jsdelivr.net/npm/echarts@5/map/js/world.js"></script>
 </head>
 <body>
-
-    <div class="form-container">
-        <h1>Contact Information</h1>
-        <p>Please fill out the form below.</p>
-        <hr>
-
-        <form action="#" method="post" class="gform"> <!-- action="#" is a placeholder -->
-
-            <div class="form-group">
-                <label for="fullname">Full Name</label>
-                <input type="text" id="fullname" name="fullname" required placeholder="Your full name">
-            </div>
-
-            <div class="form-group">
-                <label for="phone">Contact Number</label>
-                <input type="tel" id="phone" name="phone" placeholder="e.g., +1-555-123-4567">
-            </div>
-
-            <div class="form-group">
-                <label for="address">Address</label>
-                <textarea id="address" name="address" rows="4" placeholder="Your street address, city, state, zip code"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="company">Company Name</label>
-                <input type="text" id="company" name="company" placeholder="Your company's name">
-            </div>
-
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" required placeholder="your.email@example.com">
-            </div>
-
-            <div class="form-group">
-                <label for="department">Department</label>
-                <select id="department" name="department">
-                    <option value="" disabled selected>Select your department</option>
-                    <option value="hr">HR</option>
-                    <option value="sales">Sales</option>
-                    <option value="development">Development</option>
-                    <option value="marketing">Marketing</option>
-                    <option value="others">Others</option>
-                </select>
-            </div>
-
-            <div class="form-group gender-group">
-                <label>Gender</label>
-                <div class="radio-option">
-                    <input type="radio" id="male" name="gender" value="male">
-                    <label for="male">Male</label>
-                </div>
-                <div class="radio-option">
-                    <input type="radio" id="female" name="gender" value="female">
-                    <label for="female">Female</label>
-                </div>
-                <div class="radio-option">
-                    <input type="radio" id="not-specified" name="gender" value="not-specified">
-                    <label for="not-specified">Prefer not to say</label>
-                </div>
-            </div>
-
-            <div class="form-group submit-group">
-                <button type="submit">Submit</button>
-            </div>
-
-        </form>
+  <header class="app-header">
+    <div class="header-left">
+      <h1>National SoC Dashboard</h1>
+      <div class="sub">UAE — Security Operations Overview</div>
     </div>
+    <div class="header-right">
+      <div class="legend">
+        <span class="pill pill-open">Open</span>
+        <span class="pill pill-closed">Closed</span>
+        <span class="pill pill-uv">Under Investigation</span>
+      </div>
+      <div id="lastUpdated" class="last-updated">—</div>
+    </div>
+  </header>
 
+  <main class="dashboard-grid">
+    <!-- A) UAE Map with entities and origins -->
+    <section class="card span-8x2">
+      <div class="card-header">
+        <h2>UAE Map — Entities & Attack Origins</h2>
+      </div>
+      <div id="uaeMap" class="chart"></div>
+    </section>
+
+    <!-- B) Ring graph totals -->
+    <section class="card span-4x1">
+      <div class="card-header">
+        <h2>Alert Status Distribution</h2>
+      </div>
+      <div id="donutTotals" class="chart"></div>
+    </section>
+
+    <!-- C) Stacked bar by sector -->
+    <section class="card span-4x1">
+      <div class="card-header">
+        <h2>Alerts by Sector (Stacked)</h2>
+      </div>
+      <div id="stackedBySector" class="chart"></div>
+    </section>
+
+    <!-- D) Alert aging by sector -->
+    <section class="card span-6x1">
+      <div class="card-header">
+        <h2>Oldest Open Alert by Sector (Days)</h2>
+      </div>
+      <div id="agingBySector" class="chart"></div>
+    </section>
+
+    <!-- E) Top entities by volume open vs closed -->
+    <section class="card span-6x1">
+      <div class="card-header">
+        <h2>Entities with Most Alerts (Top 10)</h2>
+      </div>
+      <div id="topEntitiesStacked" class="chart"></div>
+    </section>
+
+    <!-- F) Aging of open alerts by entity -->
+    <section class="card span-6x1">
+      <div class="card-header">
+        <h2>Open Alert Aging by Entity (Top 10)</h2>
+      </div>
+      <div id="agingByEntity" class="chart"></div>
+    </section>
+
+    <!-- G) MITRE graph (Sankey) -->
+    <section class="card span-6x1">
+      <div class="card-header">
+        <h2>MITRE ATT&CK Flow</h2>
+      </div>
+      <div id="mitreSankey" class="chart"></div>
+    </section>
+
+    <!-- H) Key violations: top ten sig ids in last 24h, stacked by sector -->
+    <section class="card span-8x2">
+      <div class="card-header">
+        <h2>Key Violations — Top 10 Sig IDs (Last 24h)</h2>
+      </div>
+      <div id="topSigIdsStacked" class="chart"></div>
+    </section>
+
+    <!-- I) % change per entity 24h -->
+    <section class="card span-4x2">
+      <div class="card-header">
+        <h2>Entities — 24h % Change (Top 10)</h2>
+      </div>
+      <div id="percentChangeEntities" class="chart"></div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <span>Sample data shown. Integrate with backend API to populate live metrics.</span>
+  </footer>
+
+  <script src="dashboard.js"></script>
 </body>
 </html>
