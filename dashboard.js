@@ -50,6 +50,28 @@
     return acc;
   }, {});
 
+  // Load and register UAE map from Natural Earth via geojson.xyz
+  async function ensureUaeMapRegistered() {
+    try {
+      if (echarts.getMap('UAE')) return true;
+      const resp = await fetch('https://geojson.xyz/naturalearth-3.3.0/ne_110m_admin_0_countries.geojson');
+      const world = await resp.json();
+      const feature = world.features.find(f => f.properties && (
+        f.properties.ADMIN === 'United Arab Emirates' ||
+        f.properties.SOVEREIGNT === 'United Arab Emirates' ||
+        f.properties.ISO_A3 === 'ARE' || f.properties.SOV_A3 === 'ARE'
+      ));
+      if (feature) {
+        const fc = { type: 'FeatureCollection', features: [feature] };
+        echarts.registerMap('UAE', fc);
+        return true;
+      }
+    } catch (err) {
+      console.warn('Failed to load UAE GeoJSON; falling back to world map.', err);
+    }
+    return false;
+  }
+
   function setLastUpdated() {
     const el = document.getElementById('lastUpdated');
     if (el) {
@@ -60,7 +82,7 @@
 
   function initAll() {
     setLastUpdated();
-    initUaeMap();
+    // Initialize non-map charts immediately
     initDonutTotals();
     initStackedBySector();
     initAgingBySector();
@@ -69,6 +91,11 @@
     initMitreSankey();
     initTopSigIdsStacked();
     initPercentChangeEntities();
+
+    // Load UAE map then render the geo chart
+    ensureUaeMapRegistered().then(() => {
+      initUaeMap();
+    });
 
     window.addEventListener('resize', () => {
       Object.values(charts).forEach((c) => c && c.resize());
@@ -117,6 +144,8 @@
       value: 1
     }));
 
+    const hasUAE = !!echarts.getMap('UAE');
+
     chart.setOption({
       backgroundColor: 'transparent',
       tooltip: {
@@ -134,10 +163,9 @@
         }
       },
       geo: {
-        map: 'world',
+        map: hasUAE ? 'UAE' : 'world',
         roam: true,
-        zoom: 4.2,
-        center: [54.4, 24.6],
+        ...(hasUAE ? {} : { zoom: 4.2, center: [54.4, 24.6] }),
         selectedMode: false,
         label: { show: false },
         itemStyle: {
